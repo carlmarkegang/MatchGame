@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+    <script>
+
+    </script>
+    <canvas id="canvas" style="border:1px solid black;" onmouseup="mouse_up()"></canvas>
+
+    <script>
+        var canvas = document.getElementById("canvas");
+        canvas.width = 500;
+        canvas.height = 500;
+        var ctx = canvas.getContext("2d");
+
+        var blocks = [];
+        var colors = [];
+        var rows = 10;
+        var column = 10;
+        var mouseX = 0;
+        var mouseY = 0;
+        var scale = 50;
+        var clicks = 0;
+
+
+        function create_block(row, column, width, height, value) {
+            this.row = row;
+            this.column = column;
+            this.width = width;
+            this.height = height;
+            this.value = value;
+        }
+
+        function create_color(value, color) {
+            this.value = value;
+            this.color = color;
+        }
+
+
+        function fill_layout() {
+            var rowFill = 0;
+            for (var c = 0; c < column; c++) {
+
+                var columnFill = 0;
+                for (var r = 0; r < rows; r++) {
+                    randomNumber = getRndInteger(0, 5);
+
+                    blocks.push(new create_block(rowFill, columnFill, 1, 1, randomNumber));
+
+
+                    columnFill += 1;
+                }
+                rowFill += 1;
+            }
+        }
+
+        function spreadFull(block, inputVal, originalBlock) {
+            if (!blocks[block]) {
+                return false;
+            }
+
+            var returnVal = false;
+            for (var i = 1; i < 10; i++) {
+                var block1 = blocks.findIndex(o => o.row === blocks[block].row + i && o.column === blocks[block].column);
+                if (block1 <= 100 && block1 >= 0) {
+                    if (blocks[block1].value == inputVal) {
+                        blocks[block1].value += 1;
+                        spreadFull(block1, inputVal, originalBlock)
+                        returnVal = true;
+                        if (blocks[block1].value == 11) {
+                            blink();
+                            //setTimeout(function () {
+                                blocks[block1].value = getRndInteger(0, 8);
+                         //   }, 1000);
+                        }
+                    } else {
+                        break;
+                    }
+                }
+            }
+            for (var i = 1; i < 10; i++) {
+                var block2 = blocks.findIndex(o => o.row === blocks[block].row - i && o.column === blocks[block].column);
+                if (block2 <= 100 && block2 >= 0) {
+                    if (blocks[block2].value == inputVal) {
+
+                        blocks[block2].value += 1;
+                        spreadFull(block2, inputVal, originalBlock);
+                        returnVal = true;
+                        if (blocks[block2].value == 11) {
+                            blink();
+                           // setTimeout(function () {
+                                blocks[block2].value = getRndInteger(0, 8);
+                           // }, 1000);
+                        }
+                    } else {
+                        break;
+                    }
+                }
+            }
+            for (var i = 1; i < 10; i++) {
+                var block3 = blocks.findIndex(o => o.row === blocks[block].row && o.column === blocks[block].column + i);
+                if (block3 <= 100 && block3 >= 0) {
+                    if (blocks[block3].value == inputVal) {
+
+                        blocks[block3].value += 1;
+                        spreadFull(block3, inputVal, originalBlock);
+                        returnVal = true;
+                        if (blocks[block3].value == 11) {
+                            blink();
+                            //setTimeout(function () {
+                                blocks[block3].value = getRndInteger(0, 8);
+                           // }, 1000);
+                        }
+                    } else {
+                        break;
+                    }
+                }
+            }
+            for (var i = 1; i < 10; i++) {
+                var block4 = blocks.findIndex(o => o.row === blocks[block].row && o.column === blocks[block].column - i);
+                if (block4 <= 100 && block4 >= 0) {
+                    if (blocks[block4].value == inputVal) {
+                        blocks[block4].value += 1;
+                        spreadFull(block4, inputVal, originalBlock);
+                        returnVal = true;
+                        if (blocks[block4].value == 11) {
+                            blink();
+                            //setTimeout(function () {
+                                blocks[block4].value = getRndInteger(0, 8);
+                           // }, 1000);
+                        }
+                    } else {
+                        break;
+                    }
+                }
+            }
+
+
+            if (returnVal) {
+                //blocks[originalBlock].value += 1;
+            }
+
+            return returnVal;
+        }
+
+
+
+
+        function draw() {
+            // Background and Grid
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            var points = 0;
+
+            var fontColor = "black";
+
+            for (var i = 0; i < rows * column; i++) {
+                if (!blocks[i]) {
+                    continue;
+                }
+                if (getColorOrSaveColor(blocks[i].value)) {
+                    ctx.fillStyle = "rgba(" + getColorOrSaveColor(blocks[i].value).color + ",1)";
+                } else {
+                    ctx.fillStyle = "rgba(198,198,198,1)";
+                }
+
+                fontColor = invertColor(ctx.fillStyle);
+
+                if (mouseX - scale < (blocks[i].row * scale) && mouseX - scale > (blocks[i].row * scale) - scale) {
+                    if (mouseY - scale < (blocks[i].column * scale) && mouseY - scale > (blocks[i].column * scale) - scale) {
+
+                        if (mouseUp == true) {
+                            if (blocks[i].value < 11) {
+                                returnVal = spreadFull(i, blocks[i].value, i);
+                                if (returnVal) {
+                                    clicks += 1;
+                                }
+                            }
+
+                            mouseUp = false;
+                        }
+
+                        if (getColorOrSaveColor(blocks[i].value)) {
+                            ctx.fillStyle = "rgba(" + getColorOrSaveColor(blocks[i].value).color + ",0.5)";
+                        } else {
+                            ctx.fillStyle = "rgba(198,198,198,0.5)";
+                        }
+                    }
+                }
+
+                ctx.fillRect(blocks[i].row * scale + 1, blocks[i].column * scale + 1, blocks[i].width * scale - 2.5, blocks[i].height * scale - 2.5);
+
+                ctx.fillStyle = "black";
+                ctx.font = "15px Arial";
+                ctx.fillText(blocks[i].value, blocks[i].row * scale + 20, blocks[i].column * scale + 30);
+
+                //blocks[i].column += 0.05;
+                points += blocks[i].value;
+            }
+            document.getElementById("points").innerHTML = points;
+            document.getElementById("clicks").innerHTML = clicks;
+        }
+
+        function getColorOrSaveColor(value, selectedColor) {
+            var colorIndex = colors.findIndex(o => o.value === value)
+            if (!colors[colorIndex]) {
+                if (!selectedColor) {
+                    selectedColor = getRandomColor() + "," + getRandomColor() + "," + getRandomColor()
+                }
+                colors.push(new create_color(value, selectedColor));
+            }
+            return colors[colorIndex];
+        }
+
+        function getRandomColor() {
+            return Math.floor(Math.random() * 255) + 1;
+        }
+
+        getColorOrSaveColor(0, "2,60,255")
+        getColorOrSaveColor(1, "1,142,255")
+        getColorOrSaveColor(2, "8,204,255")
+        getColorOrSaveColor(3, "107,255,253")
+        getColorOrSaveColor(4, "228, 245, 171")
+        getColorOrSaveColor(5, "203, 235, 134")
+        getColorOrSaveColor(6, "252,237,156")
+        getColorOrSaveColor(7, "252,219,64")
+        getColorOrSaveColor(8, "255,211,32")
+        getColorOrSaveColor(9, "255,107,3")
+        getColorOrSaveColor(10, "255,51,2")
+
+        fill_layout();
+        var drawInterval = setInterval(draw, 30);
+
+        document.getElementById("canvas").addEventListener("mousemove", function (e) {
+            mouseX = e.offsetX;
+            mouseY = e.offsetY;
+        });
+
+        var mouseUp = false;
+
+        function mouse_up() {
+            mouseUp = true;
+        }
+        function getRndInteger(min, max) {
+            return Math.floor(Math.random() * (max - min)) + min;
+        }
+
+        function invertColor(hex) {
+            if (hex.indexOf('#') === 0) {
+                hex = hex.slice(1);
+            }
+            // convert 3-digit hex to 6-digits.
+            if (hex.length === 3) {
+                hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+            }
+            if (hex.length !== 6) {
+                throw new Error('Invalid HEX color.');
+            }
+            // invert color components
+            var r = (255 - parseInt(hex.slice(0, 2), 16)).toString(16),
+                g = (255 - parseInt(hex.slice(2, 4), 16)).toString(16),
+                b = (255 - parseInt(hex.slice(4, 6), 16)).toString(16);
+            // pad each with zeros and return
+            return '#' + padZero(r) + padZero(g) + padZero(b);
+        }
+
+        function padZero(str, len) {
+            len = len || 2;
+            var zeros = new Array(len).join('0');
+            return (zeros + str).slice(-len);
+        }
+
+        function blink() {
+            var blinkInterval = setInterval(blinkingBlocks, 200);
+        }
+
+        function blinkingBlocks() {
+            //for (i = 0; i < colors.length; i++) {
+            colors.splice(10, 1);
+            //}
+        }
+        blink()
+    </script>
+    <div id="points"></div>
+    <div id="clicks"></div>
+</body>
+</html>

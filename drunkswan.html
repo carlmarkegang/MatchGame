@@ -1,0 +1,405 @@
+<html>
+<head>
+    <title>DrunkSwan</title>
+</head>
+<body style="margin: 0px; padding: 0px;background-color:black;">
+    <canvas id="canvas" onmouseup="mouse_up()"  onmousedown="mouse_down()"></canvas>
+    <div id="htmlrepresentation" style="position: absolute; width: 600px; top: 0px; background: black; height: 100%; display:none;"></div>
+
+    <script>
+        var canvas = document.getElementById("canvas");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        var ctx = canvas.getContext("2d");
+
+        var blocks = [];
+        var colors = [];
+        var rows = 10;
+        var column = 10;
+        var mouseX = 0;
+        var mouseY = 0;
+        var scale = 50;
+        var clicks = 0;
+        var points = 0;
+        var touchingArray = [];
+        var selectedBlock = 0;
+        // 3 - 8
+        var difficulty = 5;
+
+        var imgdefault_1 = new Image(); imgdefault_1.src = 'default_1.png';
+        var imgdefault_2 = new Image(); imgdefault_2.src = 'default_2.png';
+        var imgdefault_3 = new Image(); imgdefault_3.src = 'default_3.png';
+        var imgdefault_4 = new Image(); imgdefault_4.src = 'default_4.png';
+        var imgdefault_5 = new Image(); imgdefault_5.src = 'default_5.png';
+        var imgdefault_6 = new Image(); imgdefault_6.src = 'default_6.png';
+        var imgdefault_7 = new Image(); imgdefault_7.src = 'default_7.png';
+
+
+
+        function create_block(row, column, type) {
+            this.row = row;
+            this.column = column;
+            this.x = row * 60;
+            this.y = column * 60;
+            this.type = type;
+            this.active = true;
+            this.isMoving = false;
+        }
+
+        for (var i = 0; i < 6; i++) {
+            for (var i2 = 0; i2 < 8; i2++) {
+                var randomType = getRndInteger(1, difficulty);
+                console.log(randomType);
+                blocks.push(new create_block(i, i2, randomType));
+            }
+        }
+
+
+        function draw() {
+
+            canvas.width = 360;
+            canvas.height = 480;
+
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+
+            for (var i = 0; i < blocks.length; i++) {
+                ctx.fillStyle = blocks[i].type;
+                blocks[i].isMoving = false
+
+                if (blocks[i].row * 60 > blocks[i].x) {
+                    blocks[i].x += 2;
+                    blocks[i].isMoving = true;
+                }
+                if (blocks[i].column * 60 > blocks[i].y) {
+                    blocks[i].y += 2;
+                    blocks[i].isMoving = true;
+                }
+                if (blocks[i].row * 60 < blocks[i].x) {
+                    blocks[i].x -= 2;
+                    blocks[i].isMoving = true;
+                }
+                if (blocks[i].column * 60 < blocks[i].y) {
+                    blocks[i].y -= 2;
+                    blocks[i].isMoving = true;
+                }
+
+                ctx.drawImage(getBlockImage(blocks[i].type), blocks[i].x, blocks[i].y);
+
+                if (mouseUp == true && MouseIntersect(blocks[i].x, blocks[i].y, 60, 60, mouseX, mouseY, 10, 10)) {
+                    blocks[i].type = selectedBlock;
+                    mouseUp = false;
+                }
+
+                if (MouseIntersect(blocks[i].x, blocks[i].y, 60, 60, mouseX, mouseY, 10, 10) && mouseDown == false) {
+                    ctx.drawImage(getBlockImage(blocks[i].type), mouseX - 30, mouseY - 30);
+                    selectedBlock = blocks[i].type;
+                }
+
+                if (mouseDown == true) {
+                    ctx.drawImage(getBlockImage(selectedBlock), mouseX - 30, mouseY - 30);
+                }
+
+
+                
+
+
+
+
+            }
+
+        }
+
+        function getBlockImage(type) {
+            var image = imgdefault_1;
+            switch (type) {
+                case 0:
+                    image = imgdefault_1;
+                    break;
+                case 1:
+                    image = imgdefault_1;
+                    break;
+                case 2:
+                    image = imgdefault_2;
+                    break;
+                case 3:
+                    image = imgdefault_3;
+                    break;
+                case 4:
+                    image = imgdefault_4;
+                    break;
+                case 5:
+                    image = imgdefault_5;
+                    break;
+                case 6:
+                    image = imgdefault_6;
+                    break
+                case 7:
+                    image = imgdefault_7;
+
+            }
+            return image;
+        }
+
+        function drawHtml() {
+            for (var i = 0; i < blocks.length; i++) {
+                var span = document.createElement("span");
+                span.style.top = (blocks[i].column * 100) + "px";
+                span.style.left = (blocks[i].row * 100) + "px";
+                span.style.backgroundColor = blocks[i].type;
+                span.style.width = "100px";
+                span.style.height = "100px";
+                span.style.display = "inline-block";
+                span.style.position = "absolute";
+                span.style.transition = "0.3s"
+                span.id = "block_" + i.toString();
+                document.getElementById("htmlrepresentation").appendChild(span)
+            }
+
+
+        }
+        drawHtml()
+
+        function updateHtml() {
+            for (var i = 0; i < blocks.length; i++) {
+                var current_block = document.getElementById("block_" + i.toString());
+                current_block.style.top = (blocks[i].column * 100) + "px";
+                current_block.style.left = (blocks[i].row * 100) + "px";
+                current_block.style.backgroundColor = blocks[i].type;
+            }
+
+
+        }
+
+        function checkAllTouching() {
+
+            for (var i = 0; i < blocks.length; i++) {
+                touchingArray = []
+                touching(blocks[i], "");
+
+                RemoveTouching()
+
+
+                touchingArray = []
+            }
+        }
+
+
+        function touching(selectedBlock, discoveredAt) {
+
+            // we have already checked this block
+            if (touchingArray.includes(selectedBlock)) {
+                return;
+            }
+
+            // Make sure everything is added, not just connecting blocks
+            if (discoveredAt != "") {
+                if (!touchingArray.includes(selectedBlock)) {
+                    touchingArray.push(selectedBlock);
+                }
+            }
+
+            // Right
+            if (discoveredAt != "Left") {
+                var block1 = blocks.find(o => o.row === selectedBlock.row + 1 && o.column === selectedBlock.column);
+                if (block1) {
+                    if (selectedBlock.type == block1.type) {
+                        if (!touchingArray.includes(selectedBlock)) {
+                            touchingArray.push(selectedBlock);
+                        }
+                        touching(block1, "Right");
+                    }
+                }
+            }
+
+            // Left
+            if (discoveredAt != "Right") {
+                var block2 = blocks.find(o => o.row === selectedBlock.row - 1 && o.column === selectedBlock.column);
+                if (block2) {
+                    if (selectedBlock.type == block2.type) {
+                        if (!touchingArray.includes(selectedBlock)) {
+                            touchingArray.push(selectedBlock);
+                        }
+                        touching(block2, "Left");
+                    }
+                }
+            }
+
+            // Down
+            if (discoveredAt != "Up") {
+                var block3 = blocks.find(o => o.row === selectedBlock.row && o.column === selectedBlock.column + 1);
+                if (block3) {
+                    if (selectedBlock.type == block3.type) {
+                        if (!touchingArray.includes(selectedBlock)) {
+                            touchingArray.push(selectedBlock);
+                        }
+                        touching(block3, "Down");
+                    }
+                }
+            }
+
+            // Up
+            if (discoveredAt != "Down") {
+                var block4 = blocks.find(o => o.row === selectedBlock.row && o.column === selectedBlock.column - 1);
+                if (block4) {
+                    if (selectedBlock.type == block4.type) {
+                        if (!touchingArray.includes(selectedBlock)) {
+                            touchingArray.push(selectedBlock);
+                        }
+                        touching(block4, "Up");
+                    }
+                }
+            }
+
+            return touchingArray
+
+        }
+
+
+        function RemoveTouching() {
+            if (touchingArray.length > 3) {
+                for (var i = 0; i < touchingArray.length; i++) {
+                    for (var i2 = 0; i2 < blocks.length; i2++) {
+                        if (touchingArray[i].row == blocks[i2].row && touchingArray[i].column == blocks[i2].column) {
+                            //blocks[i2].active = false;
+                            blocks[i2].column = -5;
+                            blocks[i2].y = -60;
+                            blocks[i2].type = getRndInteger(1, difficulty);
+                            //blocks.splice(i2, 1)
+                        }
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
+
+
+
+
+        function fall() {
+            // Down
+            var wasmoved = false;
+            for (var i = 0; i < blocks.length; i++) {
+                if ((blocks[i].column * 60) < canvas.height - 60) {
+                    var spaceOccupied = false;
+
+                    for (var i2 = 0; i2 < blocks.length; i2++) {
+                        if ((blocks[i].column + 1) == blocks[i2].column && blocks[i].row == blocks[i2].row) {
+                            spaceOccupied = true;
+                        }
+                    }
+                    if (spaceOccupied == false) {
+                        blocks[i].column += 1;
+                        wasmoved = true
+                    }
+
+                }
+            }
+
+            // Right
+            if (wasmoved == false) {
+                for (var i = 0; i < blocks.length; i++) {
+                    if ((blocks[i].row * 60) < canvas.width - 60 && (blocks[i].column * 60) < canvas.height - 60) {
+                        var spaceOccupied = false;
+
+                        for (var i2 = 0; i2 < blocks.length; i2++) {
+                            if ((blocks[i].column + 1) == blocks[i2].column && (blocks[i].row + 1) == blocks[i2].row) {
+                                spaceOccupied = true;
+                            }
+                        }
+                        if (spaceOccupied == false) {
+                            blocks[i].column += 1;
+                            blocks[i].row += 1;
+                            wasmoved = true
+                        }
+
+                    }
+                }
+            }
+
+            // Left
+            if (wasmoved == false) {
+                for (var i = 0; i < blocks.length; i++) {
+                    if ((blocks[i].row * 60) < canvas.width - 60 && (blocks[i].column * 60) < canvas.height - 60) {
+                        var spaceOccupied = false;
+
+                        for (var i2 = 0; i2 < blocks.length; i2++) {
+                            if ((blocks[i].column + 1) == blocks[i2].column && (blocks[i].row - 1) == blocks[i2].row) {
+                                spaceOccupied = true;
+                            }
+                        }
+                        if (spaceOccupied == false) {
+                            if (blocks[i].row > 0) {
+                                blocks[i].column += 1;
+                                blocks[i].row -= 1;
+                                wasmoved = true
+                            }
+                        }
+
+                    }
+                }
+            }
+
+            if (wasmoved == false) {
+                checkAllTouching();
+            }
+
+            //updateHtml()
+        }
+
+
+        function getRandomColor() {
+            return Math.floor(Math.random() * 255) + 1;
+        }
+
+
+
+        var drawInterval = setInterval(draw, 10);
+        var fallInterval = setInterval(fall, 300);
+        //var checkInterval = setInterval(checkAllTouching, 2000);
+
+
+
+
+
+        function isEven(n) {
+            return n % 2 == 0;
+        }
+
+        // Mouse controll
+        document.getElementById("canvas").addEventListener("mousemove", function (e) {
+            mouseX = e.offsetX;
+            mouseY = e.offsetY;
+        });
+        var mouseDown = false;
+        var mouseUp = false;    
+        function mouse_down() {
+            mouseDown = true;
+            mouseUp = false;
+        }
+        function mouse_up() {
+            mouseUp = true;
+            mouseDown = false;
+        }
+
+        function MouseIntersect(x1, y1, w1, h1, x2, y2, w2, h2) {
+            // Check x and y for overlap
+            if (x2 > w1 + x1 || x1 > w2 + x2 || y2 > h1 + y1 || y1 > h2 + y2) {
+                return false;
+            }
+            return true;
+        }
+
+
+
+        function getRndInteger(min, max) {
+            return Math.floor(Math.random() * (max - min)) + min;
+        }
+
+
+    </script>
+</body>
+</html>
