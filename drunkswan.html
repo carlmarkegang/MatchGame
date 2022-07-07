@@ -2,10 +2,20 @@
 <head>
     <title>DrunkSwan</title>
 </head>
-<body style="margin: 0px; padding: 0px;background-color:black;">
-    <canvas id="canvas" onmouseup="mouse_up()"  onmousedown="mouse_down()"></canvas>
+<body style="margin: 0px; padding: 0px; background-color: black; color: white; font-family: sans-serif;">
+    <canvas id="canvas" onmouseup="mouse_up()" onmousedown="mouse_down()"></canvas>
     <div id="htmlrepresentation" style="position: absolute; width: 600px; top: 0px; background: black; height: 100%; display:none;"></div>
-
+    <div>Moves:<span id="moves">0</span></div>
+    <div id="instructions" style=" width: 260px;padding-top:20px;">Hold down mouse to select a block and release it on another block to match the colors</div>
+    <div id="difficulty">
+        difficulty:
+        <a href="?difficulty=3">1</a>
+        <a href="?difficulty=4">2</a>
+        <a href="?difficulty=5">3</a>
+        <a href="?difficulty=6">4</a>
+        <a href="?difficulty=7">5</a>
+        <a href="?difficulty=8">6</a>
+    </div>
     <script>
         var canvas = document.getElementById("canvas");
         canvas.width = window.innerWidth;
@@ -23,8 +33,16 @@
         var points = 0;
         var touchingArray = [];
         var selectedBlock = 0;
-        // 3 - 8
-        var difficulty = 5;
+
+        // difficulty 3 - 8
+        var urlParams = new URLSearchParams(window.location.search);
+        var difficulty_Param = urlParams.get('difficulty');
+        var difficulty = difficulty_Param;
+        if (difficulty == undefined) {
+            difficulty = 5;
+        }
+
+        var moves = 0;
 
         var imgdefault_1 = new Image(); imgdefault_1.src = 'default_1.png';
         var imgdefault_2 = new Image(); imgdefault_2.src = 'default_2.png';
@@ -88,21 +106,21 @@
                 ctx.drawImage(getBlockImage(blocks[i].type), blocks[i].x, blocks[i].y);
 
                 if (mouseUp == true && MouseIntersect(blocks[i].x, blocks[i].y, 60, 60, mouseX, mouseY, 10, 10)) {
-                    blocks[i].type = selectedBlock;
-                    mouseUp = false;
+                    if (selectedBlock != blocks[i].type) {
+                        blocks[i].type = selectedBlock;
+                        mouseUp = false;
+                        moves += 1;
+                        document.getElementById("moves").innerHTML = moves;
+                    }
                 }
 
                 if (MouseIntersect(blocks[i].x, blocks[i].y, 60, 60, mouseX, mouseY, 10, 10) && mouseDown == false) {
-                    ctx.drawImage(getBlockImage(blocks[i].type), mouseX - 30, mouseY - 30);
                     selectedBlock = blocks[i].type;
                 }
 
                 if (mouseDown == true) {
                     ctx.drawImage(getBlockImage(selectedBlock), mouseX - 30, mouseY - 30);
                 }
-
-
-                
 
 
 
@@ -350,24 +368,10 @@
             //updateHtml()
         }
 
-
-        function getRandomColor() {
-            return Math.floor(Math.random() * 255) + 1;
-        }
-
-
-
         var drawInterval = setInterval(draw, 10);
         var fallInterval = setInterval(fall, 300);
         //var checkInterval = setInterval(checkAllTouching, 2000);
 
-
-
-
-
-        function isEven(n) {
-            return n % 2 == 0;
-        }
 
         // Mouse controll
         document.getElementById("canvas").addEventListener("mousemove", function (e) {
@@ -375,7 +379,7 @@
             mouseY = e.offsetY;
         });
         var mouseDown = false;
-        var mouseUp = false;    
+        var mouseUp = false;
         function mouse_down() {
             mouseDown = true;
             mouseUp = false;
