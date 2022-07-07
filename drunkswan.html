@@ -7,7 +7,7 @@
     <div>Moves:<span id="moves">0</span></div>
     <div id="instructions" style=" width: 260px;padding-top:20px;">Hold down mouse to select a block and release it on another block to match the colors</div>
     <div id="difficulty">
-        difficulty:
+        Difficulty:
         <a href="?t=1&difficulty=3" id="difficulty3">1</a>
         <a href="?t=1&difficulty=4" id="difficulty4">2</a>
         <a href="?t=1&difficulty=5" id="difficulty5">3</a>
@@ -63,6 +63,7 @@
             this.type = type;
             this.active = true;
             this.isMoving = false;
+            this.framesToRespawn = 0;
         }
 
         for (var i = 0; i < 6; i++) {
@@ -72,38 +73,62 @@
             }
         }
 
+        var isMovingGlobal = false;
 
         function draw() {
-
+            
             canvas.width = 360;
             canvas.height = 480;
 
             ctx.fillStyle = "black";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+   
 
-
+            isMovingGlobal = false;
             for (var i = 0; i < blocks.length; i++) {
                 ctx.fillStyle = blocks[i].type;
                 blocks[i].isMoving = false
+                
+                
 
                 if (blocks[i].row * 60 > blocks[i].x) {
                     blocks[i].x += 2;
                     blocks[i].isMoving = true;
+                    isMovingGlobal = true;
                 }
                 if (blocks[i].column * 60 > blocks[i].y) {
                     blocks[i].y += 2;
                     blocks[i].isMoving = true;
+                    isMovingGlobal = true;
                 }
                 if (blocks[i].row * 60 < blocks[i].x) {
                     blocks[i].x -= 2;
                     blocks[i].isMoving = true;
+                    isMovingGlobal = true;
                 }
                 if (blocks[i].column * 60 < blocks[i].y) {
                     blocks[i].y -= 2;
                     blocks[i].isMoving = true;
+                    isMovingGlobal = true;
                 }
 
+                if (blocks[i].active == false) {
+                    ctx.globalAlpha = 1.0;
+                    blocks[i].framesToRespawn += 1;
+
+                    if (blocks[i].framesToRespawn > 100) {
+                        blocks[i].column = -5;
+                        blocks[i].y = -300;
+                        blocks[i].type = getRndInteger(1, difficulty);
+                        blocks[i].active = true;
+                    }
+
+                } else {
+                    ctx.globalAlpha = 0.6;
+                    blocks[i].framesToRespawn = 0;
+                }
                 ctx.drawImage(getBlockImage(blocks[i].type), blocks[i].x, blocks[i].y);
+                
 
                 if (mouseUp == true && MouseIntersect(blocks[i].x, blocks[i].y, 60, 60, mouseX, mouseY, 10, 10)) {
                     if (selectedBlock != blocks[i].type) {
@@ -126,7 +151,16 @@
 
 
 
+            } 
+
+            if (isMovingGlobal == false) {
+                //while (fall() == true) {
+
+                    fall()
+               // }
+
             }
+
 
         }
 
@@ -250,12 +284,9 @@
             if (touchingArray.length > 3) {
                 for (var i = 0; i < touchingArray.length; i++) {
                     for (var i2 = 0; i2 < blocks.length; i2++) {
-                        if (touchingArray[i].row == blocks[i2].row && touchingArray[i].column == blocks[i2].column) {
-                            //blocks[i2].active = false;
-                            blocks[i2].column = -5;
-                            blocks[i2].y = -60;
-                            blocks[i2].type = getRndInteger(1, difficulty);
-                            //blocks.splice(i2, 1)
+                        if (touchingArray[i].row == blocks[i2].row && touchingArray[i].column == blocks[i2].column) {                          
+
+                            blocks[i2].active = false
                         }
                     }
                 }
@@ -336,10 +367,12 @@
                 checkAllTouching();
             }
 
+            return wasmoved;
+
         }
 
         var drawInterval = setInterval(draw, 10);
-        var fallInterval = setInterval(fall, 300);
+        //var fallInterval = setInterval(fall, 300);
         //var checkInterval = setInterval(checkAllTouching, 2000);
 
 
