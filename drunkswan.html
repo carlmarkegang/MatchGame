@@ -4,17 +4,16 @@
 </head>
 <body style="margin: 0px; padding: 0px; background-color: black; color: white; font-family: sans-serif;">
     <canvas id="canvas" onmouseup="mouse_up()" onmousedown="mouse_down()"></canvas>
-    <div id="htmlrepresentation" style="position: absolute; width: 600px; top: 0px; background: black; height: 100%; display:none;"></div>
     <div>Moves:<span id="moves">0</span></div>
     <div id="instructions" style=" width: 260px;padding-top:20px;">Hold down mouse to select a block and release it on another block to match the colors</div>
     <div id="difficulty">
         difficulty:
-        <a href="?difficulty=3">1</a>
-        <a href="?difficulty=4">2</a>
-        <a href="?difficulty=5">3</a>
-        <a href="?difficulty=6">4</a>
-        <a href="?difficulty=7">5</a>
-        <a href="?difficulty=8">6</a>
+        <a href="?difficulty=3" id="difficulty3">1</a>
+        <a href="?difficulty=4" id="difficulty4">2</a>
+        <a href="?difficulty=5" id="difficulty5">3</a>
+        <a href="?difficulty=6" id="difficulty6">4</a>
+        <a href="?difficulty=7" id="difficulty7">5</a>
+        <a href="?difficulty=8" id="difficulty8">6</a>
     </div>
     <script>
         var canvas = document.getElementById("canvas");
@@ -42,6 +41,8 @@
             difficulty = 5;
         }
 
+        document.getElementById("difficulty" + difficulty).classList.add("disabled")
+
         var moves = 0;
 
         var imgdefault_1 = new Image(); imgdefault_1.src = 'default_1.png';
@@ -67,7 +68,6 @@
         for (var i = 0; i < 6; i++) {
             for (var i2 = 0; i2 < 8; i2++) {
                 var randomType = getRndInteger(1, difficulty);
-                console.log(randomType);
                 blocks.push(new create_block(i, i2, randomType));
             }
         }
@@ -108,10 +108,11 @@
                 if (mouseUp == true && MouseIntersect(blocks[i].x, blocks[i].y, 60, 60, mouseX, mouseY, 10, 10)) {
                     if (selectedBlock != blocks[i].type) {
                         blocks[i].type = selectedBlock;
-                        mouseUp = false;
+                        
                         moves += 1;
                         document.getElementById("moves").innerHTML = moves;
                     }
+					mouseUp = false;
                 }
 
                 if (MouseIntersect(blocks[i].x, blocks[i].y, 60, 60, mouseX, mouseY, 10, 10) && mouseDown == false) {
@@ -160,38 +161,8 @@
             return image;
         }
 
-        function drawHtml() {
-            for (var i = 0; i < blocks.length; i++) {
-                var span = document.createElement("span");
-                span.style.top = (blocks[i].column * 100) + "px";
-                span.style.left = (blocks[i].row * 100) + "px";
-                span.style.backgroundColor = blocks[i].type;
-                span.style.width = "100px";
-                span.style.height = "100px";
-                span.style.display = "inline-block";
-                span.style.position = "absolute";
-                span.style.transition = "0.3s"
-                span.id = "block_" + i.toString();
-                document.getElementById("htmlrepresentation").appendChild(span)
-            }
-
-
-        }
-        drawHtml()
-
-        function updateHtml() {
-            for (var i = 0; i < blocks.length; i++) {
-                var current_block = document.getElementById("block_" + i.toString());
-                current_block.style.top = (blocks[i].column * 100) + "px";
-                current_block.style.left = (blocks[i].row * 100) + "px";
-                current_block.style.backgroundColor = blocks[i].type;
-            }
-
-
-        }
 
         function checkAllTouching() {
-
             for (var i = 0; i < blocks.length; i++) {
                 touchingArray = []
                 touching(blocks[i], "");
@@ -365,7 +336,6 @@
                 checkAllTouching();
             }
 
-            //updateHtml()
         }
 
         var drawInterval = setInterval(draw, 10);
@@ -405,5 +375,13 @@
 
 
     </script>
+
+    <style>
+        .disabled {
+            pointer-events: none;
+            cursor: default;
+            color:white;
+        }
+    </style>
 </body>
 </html>
