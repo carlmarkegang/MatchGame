@@ -5,6 +5,7 @@
 <body style="margin: 0px; padding: 0px; background-color: black; color: white; font-family: sans-serif;">
     <canvas id="canvas" onmouseup="mouse_up()" onmousedown="mouse_down()"></canvas>
     <div>Moves:<span id="moves">0</span></div>
+    <div>Points:<span id="points">0</span></div>
     <div id="instructions" style=" width: 260px;padding-top:20px;">Hold down mouse to select a block and release it on another block to match the colors</div>
     <div id="difficulty">
         Difficulty:
@@ -32,6 +33,12 @@
         var points = 0;
         var touchingArray = [];
         var selectedBlock = 0;
+        var selectedBlockX = 0;
+        var selectedBlockY = 0;
+        var selectedBlockOutOfBounds = false;
+        var moves = 0;
+        var points = 0;
+
 
         // difficulty 3 - 8
         var urlParams = new URLSearchParams(window.location.search);
@@ -43,7 +50,7 @@
 
         document.getElementById("difficulty" + difficulty).classList.add("disabled")
 
-        var moves = 0;
+        
 
         var imgdefault_1 = new Image(); imgdefault_1.src = 'default_1.png';
         var imgdefault_2 = new Image(); imgdefault_2.src = 'default_2.png';
@@ -76,20 +83,20 @@
         var isMovingGlobal = false;
 
         function draw() {
-            
+
             canvas.width = 360;
             canvas.height = 480;
 
             ctx.fillStyle = "black";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-   
+
 
             isMovingGlobal = false;
             for (var i = 0; i < blocks.length; i++) {
                 ctx.fillStyle = blocks[i].type;
                 blocks[i].isMoving = false
-                
-                
+
+
 
                 if (blocks[i].row * 60 > blocks[i].x) {
                     blocks[i].x += 2;
@@ -128,38 +135,46 @@
                     blocks[i].framesToRespawn = 0;
                 }
                 ctx.drawImage(getBlockImage(blocks[i].type), blocks[i].x, blocks[i].y);
-                
+
 
                 if (mouseUp == true && MouseIntersect(blocks[i].x, blocks[i].y, 60, 60, mouseX, mouseY, 10, 10)) {
-                    if (selectedBlock != blocks[i].type) {
+                    if (selectedBlock != blocks[i].type && selectedBlock != 0 && selectedBlockOutOfBounds == false) {
                         blocks[i].type = selectedBlock;
-                        
+
                         moves += 1;
                         document.getElementById("moves").innerHTML = moves;
                     }
-					mouseUp = false;
+                    mouseUp = false;
                 }
 
                 if (MouseIntersect(blocks[i].x, blocks[i].y, 60, 60, mouseX, mouseY, 10, 10) && mouseDown == false) {
                     selectedBlock = blocks[i].type;
+                    selectedBlockX = blocks[i].x;
+                    selectedBlockY = blocks[i].y;
                 }
 
                 if (mouseDown == true) {
+                    
+                    ctx.globalAlpha = 1;
+                    if (!MouseIntersect(mouseX - 30, mouseY - 30, 90, 90, selectedBlockX, selectedBlockY, 90, 90)) {
+                        ctx.globalAlpha = 0;
+                        selectedBlockOutOfBounds = true;
+                    } else {
+                        selectedBlockOutOfBounds = false;
+                    }
                     ctx.drawImage(getBlockImage(selectedBlock), mouseX - 30, mouseY - 30);
                 }
 
 
 
 
-            } 
+            }
 
             if (isMovingGlobal == false) {
-                //while (fall() == true) {
-
-                    fall()
-               // }
-
+                fall()
             }
+
+          
 
 
         }
@@ -284,12 +299,14 @@
             if (touchingArray.length > 3) {
                 for (var i = 0; i < touchingArray.length; i++) {
                     for (var i2 = 0; i2 < blocks.length; i2++) {
-                        if (touchingArray[i].row == blocks[i2].row && touchingArray[i].column == blocks[i2].column) {                          
-
-                            blocks[i2].active = false
+                        if (touchingArray[i].row == blocks[i2].row && touchingArray[i].column == blocks[i2].column) {
+                            blocks[i2].active = false                         
                         }
                     }
                 }
+
+                points += 1 * touchingArray.length;
+                document.getElementById("points").innerHTML = points;
                 return true;
             }
             return false;
@@ -413,7 +430,7 @@
         .disabled {
             pointer-events: none;
             cursor: default;
-            color:white;
+            color: white;
         }
     </style>
 </body>
