@@ -38,6 +38,7 @@
         var selectedBlockOutOfBounds = false;
         var moves = 0;
         var points = 0;
+		var blockSize = 60;
 
 
         // difficulty 3 - 8
@@ -65,8 +66,8 @@
         function create_block(row, column, type) {
             this.row = row;
             this.column = column;
-            this.x = row * 60;
-            this.y = column * 60;
+            this.x = row * blockSize;
+            this.y = column * blockSize;
             this.type = type;
             this.active = true;
             this.isMoving = false;
@@ -97,28 +98,29 @@
                 blocks[i].isMoving = false
 
 
-
-                if (blocks[i].row * 60 > blocks[i].x) {
+				// Animating the blocks moving on the grid
+                if (blocks[i].row * blockSize > blocks[i].x) {
                     blocks[i].x += 2;
                     blocks[i].isMoving = true;
                     isMovingGlobal = true;
                 }
-                if (blocks[i].column * 60 > blocks[i].y) {
+                if (blocks[i].column * blockSize > blocks[i].y) {
                     blocks[i].y += 2;
                     blocks[i].isMoving = true;
                     isMovingGlobal = true;
                 }
-                if (blocks[i].row * 60 < blocks[i].x) {
+                if (blocks[i].row * blockSize < blocks[i].x) {
                     blocks[i].x -= 2;
                     blocks[i].isMoving = true;
                     isMovingGlobal = true;
                 }
-                if (blocks[i].column * 60 < blocks[i].y) {
+                if (blocks[i].column * blockSize < blocks[i].y) {
                     blocks[i].y -= 2;
                     blocks[i].isMoving = true;
                     isMovingGlobal = true;
                 }
 
+				// Animation before removing block
                 if (blocks[i].active == false) {
                     ctx.globalAlpha = 1.0;
                     blocks[i].framesToRespawn += 1;
@@ -134,29 +136,32 @@
                     ctx.globalAlpha = 0.6;
                     blocks[i].framesToRespawn = 0;
                 }
+				
                 ctx.drawImage(getBlockImage(blocks[i].type), blocks[i].x, blocks[i].y);
 
-
-                if (mouseUp == true && MouseIntersect(blocks[i].x, blocks[i].y, 60, 60, mouseX, mouseY, 10, 10)) {
+				// User released the block they where holding
+                if (mouseUp == true && MouseIntersect(blocks[i].x, blocks[i].y, blockSize, blockSize, mouseX, mouseY, 10, 10)) {
                     if (selectedBlock != blocks[i].type && selectedBlock != 0 && selectedBlockOutOfBounds == false) {
                         blocks[i].type = selectedBlock;
-
                         moves += 1;
                         document.getElementById("moves").innerHTML = moves;
                     }
                     mouseUp = false;
                 }
 
-                if (MouseIntersect(blocks[i].x, blocks[i].y, 60, 60, mouseX, mouseY, 10, 10) && mouseDown == false) {
+				// User is selecting a block
+                if (MouseIntersect(blocks[i].x, blocks[i].y, blockSize, blockSize, mouseX, mouseY, 10, 10) && mouseDown == false) {
                     selectedBlock = blocks[i].type;
                     selectedBlockX = blocks[i].x;
                     selectedBlockY = blocks[i].y;
                 }
 
+                // User is holding a block
                 if (mouseDown == true) {
-                    
                     ctx.globalAlpha = 1;
-                    if (!MouseIntersect(mouseX - 30, mouseY - 30, 90, 90, selectedBlockX, selectedBlockY, 90, 90)) {
+					
+					// Release block if it goes out of bounds (the user can not move the blocks 2 steps)
+                    if (!MouseIntersect(mouseX - 30, mouseY - 30, blockSize + (blockSize/2), blockSize + (blockSize/2), selectedBlockX, selectedBlockY, blockSize + (blockSize/2), blockSize + (blockSize/2))) {
                         ctx.globalAlpha = 0;
                         selectedBlockOutOfBounds = true;
                     } else {
@@ -164,9 +169,6 @@
                     }
                     ctx.drawImage(getBlockImage(selectedBlock), mouseX - 30, mouseY - 30);
                 }
-
-
-
 
             }
 
@@ -320,7 +322,7 @@
             // Down
             var wasmoved = false;
             for (var i = 0; i < blocks.length; i++) {
-                if ((blocks[i].column * 60) < canvas.height - 60) {
+                if ((blocks[i].column * blockSize) < canvas.height - blockSize) {
                     var spaceOccupied = false;
 
                     for (var i2 = 0; i2 < blocks.length; i2++) {
@@ -339,7 +341,7 @@
             // Right
             if (wasmoved == false) {
                 for (var i = 0; i < blocks.length; i++) {
-                    if ((blocks[i].row * 60) < canvas.width - 60 && (blocks[i].column * 60) < canvas.height - 60) {
+                    if ((blocks[i].row * blockSize) < canvas.width - blockSize && (blocks[i].column * blockSize) < canvas.height - blockSize) {
                         var spaceOccupied = false;
 
                         for (var i2 = 0; i2 < blocks.length; i2++) {
@@ -360,7 +362,7 @@
             // Left
             if (wasmoved == false) {
                 for (var i = 0; i < blocks.length; i++) {
-                    if ((blocks[i].row * 60) < canvas.width - 60 && (blocks[i].column * 60) < canvas.height - 60) {
+                    if ((blocks[i].row * blockSize) < canvas.width - blockSize && (blocks[i].column * blockSize) < canvas.height - blockSize) {
                         var spaceOccupied = false;
 
                         for (var i2 = 0; i2 < blocks.length; i2++) {
