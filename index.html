@@ -1,0 +1,32 @@
+<html>
+
+<head>
+    <title>MatchGame</title>
+</head>
+
+<body style="margin: 0px; padding: 0px; background-color: black; color: white; font-family: sans-serif;">
+    <canvas id="canvas" onmouseup="mouse_up()" onmousedown="mouse_down()"></canvas>
+    <div>Moves:<span id="moves">0</span></div>
+    <div id="instructions" style=" width: 260px;padding-top:20px;">Hold down mouse to select a block and release it on
+        another block to match the colors</div>
+    <div id="difficulty">
+        Difficulty:
+        <a href="?t=1&difficulty=3" id="difficulty3">1</a>
+        <a href="?t=1&difficulty=4" id="difficulty4">2</a>
+        <a href="?t=1&difficulty=5" id="difficulty5">3</a>
+        <a href="?t=1&difficulty=6" id="difficulty6">4</a>
+        <a href="?t=1&difficulty=7" id="difficulty7">5</a>
+        <a href="?t=1&difficulty=8" id="difficulty8">6</a>
+    </div>
+    <script src="game.js"></script>
+
+    <style>
+        .disabled {
+            pointer-events: none;
+            cursor: default;
+            color: white;
+        }
+    </style>
+</body>
+
+</html>

@@ -1,62 +1,41 @@
-<html>
-
-<head>
-    <title>DrunkSwan</title>
-</head>
-
-<body style="margin: 0px; padding: 0px; background-color: black; color: white; font-family: sans-serif;">
-    <canvas id="canvas" onmouseup="mouse_up()" onmousedown="mouse_down()"></canvas>
-    <div>Moves:<span id="moves">0</span></div>
-    <div id="instructions" style=" width: 260px;padding-top:20px;">Hold down mouse to select a block and release it on
-        another block to match the colors</div>
-    <div id="difficulty">
-        Difficulty:
-        <a href="?t=1&difficulty=3" id="difficulty3">1</a>
-        <a href="?t=1&difficulty=4" id="difficulty4">2</a>
-        <a href="?t=1&difficulty=5" id="difficulty5">3</a>
-        <a href="?t=1&difficulty=6" id="difficulty6">4</a>
-        <a href="?t=1&difficulty=7" id="difficulty7">5</a>
-        <a href="?t=1&difficulty=8" id="difficulty8">6</a>
-    </div>
-    <script>
-        var canvas = document.getElementById("canvas");
+	    "use strict";
+        let canvas = document.getElementById("canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        var ctx = canvas.getContext("2d");
-
-        var blocks = [];
-        var colors = [];
-        var rows = 10;
-        var column = 10;
-        var mouseX = 0;
-        var mouseY = 0;
-        var scale = 50;
-        var clicks = 0;
-        var points = 0;
-        var touchingArray = [];
-        var selectedBlock = 0;
-        var selectedBlockX = 0;
-        var selectedBlockY = 0;
-        var selectedBlockOutOfBounds = false;
-        var moves = 0;
-        var blockSize = 60;
+        let ctx = canvas.getContext("2d");      
+        let blocks = [];
+        let colors = [];
+        let rows = 10;
+        let column = 10;
+        let mouseX = 0;
+        let mouseY = 0;
+        let scale = 50;
+        let clicks = 0;
+        let points = 0;
+        let touchingArray = [];
+        let selectedBlock = 0;
+        let selectedBlockX = 0;
+        let selectedBlockY = 0;
+        let selectedBlockOutOfBounds = false;
+        let moves = 0;
+        let blockSize = 60;
 
         // difficulty 3 - 8
-        var urlParams = new URLSearchParams(window.location.search);
-        var difficulty_Param = urlParams.get('difficulty');
-        var difficulty = difficulty_Param;
+        let urlParams = new URLSearchParams(window.location.search);
+        let difficulty_Param = urlParams.get('difficulty');
+        let difficulty = difficulty_Param;
         if (difficulty == undefined) {
             difficulty = 5;
         }
         document.getElementById("difficulty" + difficulty).classList.add("disabled")
 
-        var imgdefault_1 = new Image(); imgdefault_1.src = 'default_1.png';
-        var imgdefault_2 = new Image(); imgdefault_2.src = 'default_2.png';
-        var imgdefault_3 = new Image(); imgdefault_3.src = 'default_3.png';
-        var imgdefault_4 = new Image(); imgdefault_4.src = 'default_4.png';
-        var imgdefault_5 = new Image(); imgdefault_5.src = 'default_5.png';
-        var imgdefault_6 = new Image(); imgdefault_6.src = 'default_6.png';
-        var imgdefault_7 = new Image(); imgdefault_7.src = 'default_7.png';
+        let imgdefault_1 = new Image(); imgdefault_1.src = 'default_1.png';
+        let imgdefault_2 = new Image(); imgdefault_2.src = 'default_2.png';
+        let imgdefault_3 = new Image(); imgdefault_3.src = 'default_3.png';
+        let imgdefault_4 = new Image(); imgdefault_4.src = 'default_4.png';
+        let imgdefault_5 = new Image(); imgdefault_5.src = 'default_5.png';
+        let imgdefault_6 = new Image(); imgdefault_6.src = 'default_6.png';
+        let imgdefault_7 = new Image(); imgdefault_7.src = 'default_7.png';
 
 
 
@@ -71,14 +50,14 @@
             this.framesToRespawn = 0;
         }
 
-        for (var i = 0; i < 6; i++) {
-            for (var i2 = 0; i2 < 8; i2++) {
-                var randomType = getRndInteger(1, difficulty);
+        for (let i = 0; i < 6; i++) {
+            for (let i2 = 0; i2 < 8; i2++) {
+                let randomType = getRndInteger(1, difficulty);
                 blocks.push(new create_block(i, i2, randomType));
             }
         }
 
-        var isMovingGlobal = false;
+        let isMovingGlobal = false;
 
         function draw() {
 
@@ -90,7 +69,7 @@
 
 
             isMovingGlobal = false;
-            for (var i = 0; i < blocks.length; i++) {
+            for (let i = 0; i < blocks.length; i++) {
                 ctx.fillStyle = blocks[i].type;
                 blocks[i].isMoving = false
 
@@ -182,7 +161,7 @@
         }
 
         function getBlockImage(type) {
-            var image = imgdefault_1;
+            let image = imgdefault_1;
             switch (type) {
                 case 0:
                     image = imgdefault_1;
@@ -214,7 +193,7 @@
 
 
         function checkAllTouching() {
-            for (var i = 0; i < blocks.length; i++) {
+            for (let i = 0; i < blocks.length; i++) {
                 touchingArray = []
                 touching(blocks[i], "");
 
@@ -242,7 +221,7 @@
 
             // Right
             if (discoveredAt != "Left") {
-                var block1 = blocks.find(o => o.row === selectedBlock.row + 1 && o.column === selectedBlock.column);
+                let block1 = blocks.find(o => o.row === selectedBlock.row + 1 && o.column === selectedBlock.column);
                 if (block1) {
                     if (selectedBlock.type == block1.type) {
                         if (!touchingArray.includes(selectedBlock)) {
@@ -255,7 +234,7 @@
 
             // Left
             if (discoveredAt != "Right") {
-                var block2 = blocks.find(o => o.row === selectedBlock.row - 1 && o.column === selectedBlock.column);
+                let block2 = blocks.find(o => o.row === selectedBlock.row - 1 && o.column === selectedBlock.column);
                 if (block2) {
                     if (selectedBlock.type == block2.type) {
                         if (!touchingArray.includes(selectedBlock)) {
@@ -268,7 +247,7 @@
 
             // Down
             if (discoveredAt != "Up") {
-                var block3 = blocks.find(o => o.row === selectedBlock.row && o.column === selectedBlock.column + 1);
+                let block3 = blocks.find(o => o.row === selectedBlock.row && o.column === selectedBlock.column + 1);
                 if (block3) {
                     if (selectedBlock.type == block3.type) {
                         if (!touchingArray.includes(selectedBlock)) {
@@ -281,7 +260,7 @@
 
             // Up
             if (discoveredAt != "Down") {
-                var block4 = blocks.find(o => o.row === selectedBlock.row && o.column === selectedBlock.column - 1);
+                let block4 = blocks.find(o => o.row === selectedBlock.row && o.column === selectedBlock.column - 1);
                 if (block4) {
                     if (selectedBlock.type == block4.type) {
                         if (!touchingArray.includes(selectedBlock)) {
@@ -299,8 +278,8 @@
 
         function RemoveTouching() {
             if (touchingArray.length > 3) {
-                for (var i = 0; i < touchingArray.length; i++) {
-                    for (var i2 = 0; i2 < blocks.length; i2++) {
+                for (let i = 0; i < touchingArray.length; i++) {
+                    for (let i2 = 0; i2 < blocks.length; i2++) {
                         if (touchingArray[i].row == blocks[i2].row && touchingArray[i].column == blocks[i2].column) {
                             blocks[i2].active = false;
                         }
@@ -319,12 +298,12 @@
 
         function fall() {
             // Down
-            var wasmoved = false;
-            for (var i = 0; i < blocks.length; i++) {
+            let wasmoved = false;
+            for (let i = 0; i < blocks.length; i++) {
                 if ((blocks[i].column * blockSize) < canvas.height - blockSize) {
-                    var spaceOccupied = false;
+                    let spaceOccupied = false;
 
-                    for (var i2 = 0; i2 < blocks.length; i2++) {
+                    for (let i2 = 0; i2 < blocks.length; i2++) {
                         if ((blocks[i].column + 1) == blocks[i2].column && blocks[i].row == blocks[i2].row) {
                             spaceOccupied = true;
                         }
@@ -339,11 +318,11 @@
 
             // Right
             if (wasmoved == false) {
-                for (var i = 0; i < blocks.length; i++) {
+                for (let i = 0; i < blocks.length; i++) {
                     if ((blocks[i].row * blockSize) < canvas.width - blockSize && (blocks[i].column * blockSize) < canvas.height - blockSize) {
-                        var spaceOccupied = false;
+                        let spaceOccupied = false;
 
-                        for (var i2 = 0; i2 < blocks.length; i2++) {
+                        for (let i2 = 0; i2 < blocks.length; i2++) {
                             if ((blocks[i].column + 1) == blocks[i2].column && (blocks[i].row + 1) == blocks[i2].row) {
                                 spaceOccupied = true;
                             }
@@ -360,11 +339,11 @@
 
             // Left
             if (wasmoved == false) {
-                for (var i = 0; i < blocks.length; i++) {
+                for (let i = 0; i < blocks.length; i++) {
                     if ((blocks[i].row * blockSize) < canvas.width - blockSize && (blocks[i].column * blockSize) < canvas.height - blockSize) {
-                        var spaceOccupied = false;
+                        let spaceOccupied = false;
 
-                        for (var i2 = 0; i2 < blocks.length; i2++) {
+                        for (let i2 = 0; i2 < blocks.length; i2++) {
                             if ((blocks[i].column + 1) == blocks[i2].column && (blocks[i].row - 1) == blocks[i2].row) {
                                 spaceOccupied = true;
                             }
@@ -389,9 +368,9 @@
 
         }
 
-        var drawInterval = setInterval(draw, 7);
-        //var fallInterval = setInterval(fall, 300);
-        //var checkInterval = setInterval(checkAllTouching, 2000);
+        let drawInterval = setInterval(draw, 7);
+        //let fallInterval = setInterval(fall, 300);
+        //let checkInterval = setInterval(checkAllTouching, 2000);
 
 
         // Mouse controll
@@ -399,8 +378,8 @@
             mouseX = e.offsetX;
             mouseY = e.offsetY;
         });
-        var mouseDown = false;
-        var mouseUp = false;
+        let mouseDown = false;
+        let mouseUp = false;
         function mouse_down() {
             mouseDown = true;
             mouseUp = false;
@@ -424,16 +403,3 @@
             return Math.floor(Math.random() * (max - min)) + min;
         }
 
-
-    </script>
-
-    <style>
-        .disabled {
-            pointer-events: none;
-            cursor: default;
-            color: white;
-        }
-    </style>
-</body>
-
-</html>
