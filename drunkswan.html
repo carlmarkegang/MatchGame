@@ -1,12 +1,14 @@
 <html>
+
 <head>
     <title>DrunkSwan</title>
 </head>
+
 <body style="margin: 0px; padding: 0px; background-color: black; color: white; font-family: sans-serif;">
     <canvas id="canvas" onmouseup="mouse_up()" onmousedown="mouse_down()"></canvas>
     <div>Moves:<span id="moves">0</span></div>
-    <div>Points:<span id="points">0</span></div>
-    <div id="instructions" style=" width: 260px;padding-top:20px;">Hold down mouse to select a block and release it on another block to match the colors</div>
+    <div id="instructions" style=" width: 260px;padding-top:20px;">Hold down mouse to select a block and release it on
+        another block to match the colors</div>
     <div id="difficulty">
         Difficulty:
         <a href="?t=1&difficulty=3" id="difficulty3">1</a>
@@ -37,9 +39,7 @@
         var selectedBlockY = 0;
         var selectedBlockOutOfBounds = false;
         var moves = 0;
-        var points = 0;
-		var blockSize = 60;
-
+        var blockSize = 60;
 
         // difficulty 3 - 8
         var urlParams = new URLSearchParams(window.location.search);
@@ -48,10 +48,7 @@
         if (difficulty == undefined) {
             difficulty = 5;
         }
-
         document.getElementById("difficulty" + difficulty).classList.add("disabled")
-
-        
 
         var imgdefault_1 = new Image(); imgdefault_1.src = 'default_1.png';
         var imgdefault_2 = new Image(); imgdefault_2.src = 'default_2.png';
@@ -86,7 +83,7 @@
         function draw() {
 
             canvas.width = 360;
-            canvas.height = 480;
+            canvas.height = 540;
 
             ctx.fillStyle = "black";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -98,7 +95,7 @@
                 blocks[i].isMoving = false
 
 
-				// Animating the blocks moving on the grid
+                // Animating the blocks moving on the grid
                 if (blocks[i].row * blockSize > blocks[i].x) {
                     blocks[i].x += 2;
                     blocks[i].isMoving = true;
@@ -120,7 +117,7 @@
                     isMovingGlobal = true;
                 }
 
-				// Animation before removing block
+                // Animation before removing block
                 if (blocks[i].active == false) {
                     ctx.globalAlpha = 1.0;
                     blocks[i].framesToRespawn += 1;
@@ -136,10 +133,10 @@
                     ctx.globalAlpha = 0.6;
                     blocks[i].framesToRespawn = 0;
                 }
-				
+
                 ctx.drawImage(getBlockImage(blocks[i].type), blocks[i].x, blocks[i].y);
 
-				// User released the block they where holding
+                // User released the block they where holding
                 if (mouseUp == true && MouseIntersect(blocks[i].x, blocks[i].y, blockSize, blockSize, mouseX, mouseY, 10, 10)) {
                     if (selectedBlock != blocks[i].type && selectedBlock != 0 && selectedBlockOutOfBounds == false) {
                         blocks[i].type = selectedBlock;
@@ -149,7 +146,7 @@
                     mouseUp = false;
                 }
 
-				// User is selecting a block
+                // User is selecting a block
                 if (MouseIntersect(blocks[i].x, blocks[i].y, blockSize, blockSize, mouseX, mouseY, 10, 10) && mouseDown == false) {
                     selectedBlock = blocks[i].type;
                     selectedBlockX = blocks[i].x;
@@ -159,9 +156,9 @@
                 // User is holding a block
                 if (mouseDown == true) {
                     ctx.globalAlpha = 1;
-					
-					// Release block if it goes out of bounds (the user can not move the blocks 2 steps)
-                    if (!MouseIntersect(mouseX - 30, mouseY - 30, blockSize + (blockSize/2), blockSize + (blockSize/2), selectedBlockX, selectedBlockY, blockSize + (blockSize/2), blockSize + (blockSize/2))) {
+
+                    // Release block if it goes out of bounds (the user can not move the blocks 2 steps)
+                    if (!MouseIntersect(mouseX - 30, mouseY - 30, blockSize + (blockSize / 2), blockSize + (blockSize / 2), selectedBlockX, selectedBlockY, blockSize + (blockSize / 2), blockSize + (blockSize / 2))) {
                         ctx.globalAlpha = 0;
                         selectedBlockOutOfBounds = true;
                     } else {
@@ -176,7 +173,10 @@
                 fall()
             }
 
-          
+            ctx.fillStyle = "white";
+            ctx.font = "30px Arial";
+            ctx.fillText(points, 10, 42);
+
 
 
         }
@@ -302,13 +302,12 @@
                 for (var i = 0; i < touchingArray.length; i++) {
                     for (var i2 = 0; i2 < blocks.length; i2++) {
                         if (touchingArray[i].row == blocks[i2].row && touchingArray[i].column == blocks[i2].column) {
-                            blocks[i2].active = false                         
+                            blocks[i2].active = false;
                         }
                     }
                 }
 
                 points += 1 * touchingArray.length;
-                document.getElementById("points").innerHTML = points;
                 return true;
             }
             return false;
@@ -436,4 +435,5 @@
         }
     </style>
 </body>
+
 </html>
